@@ -21,18 +21,17 @@ public class travelLog {
         String number;
         String pass;
         String confirmPass;
-        User p = loadProfile();
-        if (p != null) System.out.println(
-            "Previous User Profile Detected, Please Sign In If This Profile Is Yours"
+        System.out.println("If You Already Created A User Profile, Please Proceed To Sign In");
+        System.out.println(
+            "==================================================\n"
         );
-        else System.out.println(
-            "No Previous User Profile Detected Please Proceed To Sign Up"
-        );
-        System.out.println();
         System.out.println("Travel Log");
         System.out.print("[1] Sign Up \n[2] Sign In\n\nEnter Choice: ");
-        int userInput = s.nextInt();
+        int userInput = numOnly();
         s.nextLine();
+        System.out.println(
+            "==================================================\n"
+        );
         System.out.println();
         switch (userInput) {
             case 1:
@@ -126,13 +125,14 @@ public class travelLog {
                     System.out.println(
                         "Password Must Contain 8-20 Characters, Must Contain At Least: 1 Uppercase Letter, 1 Lowercase Letter, 1 Number, And 1 Special Character"
                     );
-                    System.out.print("Enter Password:");
+                    System.out.print("Enter Password: ");
                     pass = s.nextLine();
-                    do {
-                        System.out.print("Confirmation: ");
-                        confirmPass = s.nextLine();
-                    } while (!pass.equals(confirmPass));
-                    if (
+                    System.out.print("Confirmation: ");
+                    confirmPass = s.nextLine();
+                    if (!pass.equals(confirmPass)) System.out.println(
+                        "Passwords Do Not Match, Please Try Again.\n"
+                    );
+                    else if (
                         isinValidLength(pass, 8, 20) ||
                         !pass.matches("^[a-zA-Z0-9!@#$%&*.]+$") ||
                         !pass.matches(".*[A-Z].*") ||
@@ -144,6 +144,7 @@ public class travelLog {
                         "Invalid Input, Please Try Again. Follow The Instructions Below\n"
                     );
                 } while (
+                    !pass.equals(confirmPass) ||
                     isinValidLength(pass, 8, 20) ||
                     !pass.matches("^[a-zA-Z0-9!@#$%&*.]+$") ||
                     !pass.matches(".*[A-Z].*") ||
@@ -158,54 +159,34 @@ public class travelLog {
                     "Do You Want To Save Your Profile Information So You Can Just Log In Next Time?\n"
                 );
                 if (yesOrNo()) {
-                    saveUser(p);
-                    System.out.println(
-                        "Profile Information Has Been Saved. Please Log In Next Time"
-                    );
+                    if (saveUser(p)) {
+                        System.out.println(
+                            "Profile Information Has Been Saved. Please Log In Next Time"
+                        );
+                    } else {
+                        System.out.println(
+                            "Profile Information Could Not Be Saved."
+                        );
+                    }
                 } else System.out.println("Profile Information Not Saved.");
                 System.out.println();
                 System.out.println(
                     "Account Created Succesfuly, Now Proceeding To Log In"
                 );
                 System.out.println();
+                login();
+                break;
             case 2:
-                System.out.println("Log In");
-                System.out.println("Please Fill Up the Following");
+                p = loadProfile();
+                if (p == null) {
+                    System.out.println(
+                        "No User Profile Was Loaded. Please Sign Up Or Try Again Later."
+                    );
+                    break;
+                }
+                System.out.println("User Profile Loaded Successfully.");
                 System.out.println();
-                int attempts = 3;
-                do {
-                    System.out.print("Enter Username: ");
-                    String loginUser = s.nextLine();
-                    System.out.print("Enter Password: ");
-                    String loginPass = s.nextLine();
-                    if (
-                        loginUser.equals(p.userName) &&
-                        loginPass.equals(p.passW)
-                    ) {
-                        System.out.println("Log In Succesful");
-                        System.out.println();
-                        menu(p.fullName);
-                        break;
-                    } else if (
-                        !loginUser.equals(p.userName) ||
-                        !loginPass.equals(p.passW)
-                    ) {
-                        attempts--;
-                        System.out.println(
-                            "Invalid User Name Or Password, Please Try Again " +
-                                attempts +
-                                " Remaining"
-                        );
-                        if (attempts == 0) {
-                            System.out.println(
-                                "Login Unsuccessful, Please Try Again Later. Type \"Okay\" To Terminate"
-                            );
-                            s.nextLine();
-                            break;
-                        }
-                        System.out.println();
-                    }
-                } while (attempts > 0);
+                login();
                 break;
             default:
                 System.out.println("Input Out Of Reach");
@@ -225,7 +206,7 @@ public class travelLog {
             System.out.println(
                 "==================================================\n"
             );
-            System.out.println("Welcome, <" + name + ">!\n");
+            System.out.println("Welcome, " + name + "!\n");
             System.out.println(
                 "[1] Add Travel Log\n" +
                     "[2] Add Trip Plan\n" +
@@ -280,6 +261,9 @@ public class travelLog {
             case 7:
                 displayUser();
                 break;
+            case 8:
+                displayRecordsByUsername();
+                break;
             case 9:
                 displayAllTravelLogs();
                 break;
@@ -291,6 +275,12 @@ public class travelLog {
                 break;
             case 12:
                 searchTripPlan();
+                break;
+            case 13:
+                exportData();
+                break;
+            case 14:
+                importData();
                 break;
             default:
                 break;
@@ -423,7 +413,9 @@ public class travelLog {
             numOfVisits,
             firstDateVisited,
             location,
-            travelexp
+            travelexp,
+            p.userName,
+            p.fullName
         );
         System.out.println(
             "Log \"" + log[logCount].destinationName + "\" Has Been Saved!"
@@ -605,7 +597,9 @@ public class travelLog {
             tripNumActivities,
             tripListActivities,
             tripNumInstructions,
-            tripInstructions
+            tripInstructions,
+            p.userName,
+            p.fullName
         );
         System.out.println(
             "Trip \"" + trip[tripCount].planName + "\" Has Been Saved!"
@@ -1838,6 +1832,144 @@ public class travelLog {
         System.out.println();
     }
 
+
+    static void displayRecordsByUsername() {
+        String searchName;
+        System.out.println(
+            "==================================================\n"
+        );
+        System.out.println("[8] Display Records By Username Menu");
+        System.out.println(
+            "==================================================\n"
+        );
+
+        do {
+            System.out.println(
+                "Username Must Contain 8-50 Characters And No Special Characters Or Spaces Are Allowed."
+            );
+            System.out.print("Enter Username To Search: ");
+            searchName = s.nextLine().trim();
+            System.out.println();
+            if (
+                isinValidLength(searchName, 8, 50) ||
+                !searchName.matches("^[a-zA-Z0-9]+$")
+            ) System.out.println(
+                "Invalid Input, Please Try Again. Follow The Instructions Below\n"
+            );
+        } while (
+            isinValidLength(searchName, 8, 50) ||
+            !searchName.matches("^[a-zA-Z0-9]+$")
+        );
+
+        // Count this author's records and remember the author's full name
+        int logMatches = 0;
+        int tripMatches = 0;
+        String authorName = null;
+        for (int i = 0; i < logCount; i++) {
+            if (log[i].authorUsername.equals(searchName)) {
+                logMatches++;
+                if (authorName == null) authorName = log[i].authorFullName;
+            }
+        }
+        for (int i = 0; i < tripCount; i++) {
+            if (trip[i].authorUsername.equals(searchName)) {
+                tripMatches++;
+                if (authorName == null) authorName = trip[i].authorFullName;
+            }
+        }
+
+        boolean isCurrentUser = searchName.equals(p.userName);
+        if (!isCurrentUser && authorName == null) {
+            System.out.println(
+                "No Records Found For The Username \"" + searchName + "\""
+            );
+            System.out.println();
+            return;
+        }
+
+        System.out.println("Username      : " + searchName);
+        if (isCurrentUser) {
+            // Logged-in user: complete information may be displayed
+            System.out.println("Full Name     : " + p.fullName);
+            System.out.println("Email Address : " + p.emailAddr);
+            System.out.println("Mobile Number : " + p.mobNumber);
+        } else {
+            System.out.println("Full Name     : " + authorName);
+        }
+        System.out.println();
+
+        // Travel Logs
+        System.out.println(
+            "TRAVEL LOGS BY " + searchName + " (" + logMatches + " Total)"
+        );
+        if (logMatches == 0) {
+            System.out.println("There Are No Recorded Travel Logs.");
+        }
+        int number = 0;
+        for (int i = 0; i < logCount; i++) {
+            if (!log[i].authorUsername.equals(searchName)) continue;
+            number++;
+            System.out.println(
+                "--------------------------------------------------"
+            );
+            System.out.println("Travel Log [" + number + "]");
+            System.out.println(
+                "Destination Name   : " + log[i].destinationName
+            );
+            System.out.println(
+                "Destination Type   : " +
+                    destinationTypeName(log[i].destinationType)
+            );
+            System.out.println("Number Of Visits   : " + log[i].visits);
+            System.out.println("Date First Visited : " + log[i].dateVisited);
+            System.out.println("Location           : " + log[i].location);
+            System.out.println("Travel Experience  : " + log[i].travelExp);
+        }
+        System.out.println(
+            "--------------------------------------------------\n"
+        );
+
+        // Trip Plans
+        System.out.println(
+            "TRIP PLANS BY " + searchName + " (" + tripMatches + " Total)"
+        );
+        if (tripMatches == 0) {
+            System.out.println("There Are No Recorded Trip Plans.");
+        }
+        number = 0;
+        for (int i = 0; i < tripCount; i++) {
+            if (!trip[i].authorUsername.equals(searchName)) continue;
+            number++;
+            System.out.println(
+                "--------------------------------------------------"
+            );
+            System.out.println("Trip Plan [" + number + "]");
+            System.out.println("Trip Name        : " + trip[i].planName);
+            System.out.println("Description      : " + trip[i].planDescription);
+            System.out.println(
+                "Preparation Time : " + trip[i].planPrepTime + " minutes"
+            );
+            System.out.println(
+                "Travel Time      : " + trip[i].planTravelTime + " minutes"
+            );
+            System.out.println("Activities       :");
+            for (int j = 0; j < trip[i].planActivities; j++) {
+                System.out.println(
+                    "  [" + (j + 1) + "] " + trip[i].tripListActivities[j]
+                );
+            }
+            System.out.println("Instructions     :");
+            for (int j = 0; j < trip[i].planNumInstructions; j++) {
+                System.out.println(
+                    "  [" + (j + 1) + "] " + trip[i].planInstructions[j]
+                );
+            }
+        }
+        System.out.println(
+            "--------------------------------------------------\n"
+        );
+    }
+
     static void displayAllTravelLogs() {
         System.out.println(
             "==================================================\n"
@@ -1897,77 +2029,515 @@ public class travelLog {
         }
     }
 
-    static String fileName = "";
 
-    static void saveUser(User p) {
-        do {
-            System.out.println();
+    static void login() {
+        System.out.println("Log In");
+        System.out.println("Please Fill Up The Following");
+        System.out.println();
+        int failed = 0;
+        while (failed < 3) {
+            System.out.print("Enter Username: ");
+            String loginUser = s.nextLine();
+            System.out.print("Enter Password: ");
+            String loginPass = s.nextLine();
+            if (loginUser.equals(p.userName) && loginPass.equals(p.passW)) {
+                System.out.println("Log In Succesful");
+                System.out.println();
+                menu(p.fullName);
+                return;
+            }
+            failed++;
             System.out.println(
-                "Please Enter The Name Of The File Where You Want Your Account Information To Be Saved "
+                "Login Unsuccessful. Unsuccessful Attempts: " +
+                    failed +
+                    " Of 3"
             );
-            System.out.print(
-                "File Name Must Not Exceed 30 Characters, Including The File Extensions.\nEnter File Name:"
-            );
-            fileName = s.nextLine();
             System.out.println();
-            if (
-                isinValidLength(fileName, 1, 30) ||
-                !fileName.contains(".txt") ||
-                fileName.isBlank()
-            ) System.out.println(
-                "Invalid Input, Please Follow The Instructions Above"
-            );
-        } while (
-            isinValidLength(fileName, 1, 30) ||
-            !fileName.contains(".txt") ||
-            fileName.isBlank()
+        }
+        System.out.println(
+            "Too Many Unsuccessful Login Attempts. You May Try Again Later."
         );
-        try {
-            BufferedWriter w = new BufferedWriter(new FileWriter("User.txt"));
-            w.write(p.fullName);
-            w.newLine();
-            w.write(p.userName);
-            w.newLine();
-            w.write(p.emailAddr);
-            w.newLine();
-            w.write(p.mobNumber);
-            w.newLine();
-            w.write(p.passW);
-            w.close();
+        String confirm;
+        do {
+            System.out.print("Type \"Okay\" To Terminate: ");
+            confirm = s.nextLine().trim();
+        } while (!confirm.equalsIgnoreCase("okay"));
+    }
+
+
+    static void importData() {
+        System.out.println(
+            "==================================================\n"
+        );
+        System.out.println("[14] Import Menu");
+        System.out.println(
+            "==================================================\n"
+        );
+        System.out.println("[1] Import Travel Logs\n[2] Import Trip Plans\n");
+        int choice;
+        do {
+            System.out.print("Enter Choice: ");
+            choice = numOnly();
+            s.nextLine();
+            if (choice < 1 || choice > 2) System.out.println(
+                "Invalid Input, Please Choose Among The Choices Only."
+            );
+        } while (choice < 1 || choice > 2);
+
+        String fileName = readFileName(
+            "Please Enter The Name Of The File You Want To Import"
+        );
+        try (BufferedReader r = new BufferedReader(new FileReader(fileName))) {
+            if (choice == 1) importTravelLogs(r);
+            else importTripPlans(r);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Invalid File.");
+            System.out.println("Unable To Import Data.");
+        }
+    }
+
+
+    static void importTravelLogs(BufferedReader r) throws IOException {
+        int added = 0;
+        int skipped = 0;
+        String name;
+        while ((name = r.readLine()) != null) {
+            if (name.isBlank()) continue;
+            String author = r.readLine();
+            String typeVisits = r.readLine();
+            String date = r.readLine();
+            String loc = r.readLine();
+            String exp = r.readLine();
+            if (exp == null) {
+                System.out.println("Invalid File.");
+                System.out.println("Unable To Import Data.");
+                break;
+            }
+
+            String[] tv = typeVisits.trim().split(" ");
+            int visits = tv.length == 2 ? toInt(tv[1]) : -1;
+            String problem = null;
+            if (
+                isinValidLength(name, 3, 50) ||
+                !name.matches("^[a-zA-Z0-9 ]+$")
+            ) problem = "Invalid Destination Name.";
+            else if (!isValidAuthor(author)) problem = "Invalid Author.";
+            else if (tv.length != 2 || !tv[0].matches("[bmcho]")) problem =
+                "Invalid Destination Type.";
+            else if (!isPositive(visits)) problem = "Invalid Number Of Visits.";
+            else if (!date.matches("\\d{2}/\\d{2}/\\d{4}")) problem =
+                "Invalid Date First Visited.";
+            else if (loc.isBlank() || isinValidLength(loc, 1, 30)) problem =
+                "Invalid Location.";
+            else if (exp.isBlank() || isinValidLength(exp, 1, 300)) problem =
+                "Invalid Travel Experience.";
+            else if (isDuplicate(name, logCount, log)) problem =
+                "Destination Already Exists.";
+
+            if (problem != null) {
+                System.out.println(
+                    "Skipping \"" + name + "\": " + problem + "\n"
+                );
+                skipped++;
+                continue;
+            }
+            if (logCount == 50) {
+                System.out.println(
+                    "Travel Log Limit Reached. No Additional Records Can Be Added."
+                );
+                break;
+            }
+
+            System.out.println("--------------------------------------------------");
+            System.out.println("Destination Name   : " + name);
+            System.out.println("Author             : " + author);
+            System.out.println("Destination Type   : " + destinationTypeName(tv[0]));
+            System.out.println("Number Of Visits   : " + visits);
+            System.out.println("Date First Visited : " + date);
+            System.out.println("Location           : " + loc);
+            System.out.println("Travel Experience  : " + exp);
+            System.out.println("--------------------------------------------------");
+            System.out.println("Do You Want To Add This Travel Log?");
+            if (yesOrNo()) {
+                log[logCount] = new TravelLogObject(
+                    name,
+                    tv[0],
+                    visits,
+                    date,
+                    loc,
+                    exp,
+                    author.split(" ", 2)[0],
+                    author.split(" ", 2)[1]
+                );
+                logCount++;
+                added++;
+                System.out.println("Travel Log Added.\n");
+            } else {
+                skipped++;
+                System.out.println("Travel Log Skipped.\n");
+            }
+        }
+        System.out.println(
+            "Import Finished. Added: " + added + ", Skipped: " + skipped
+        );
+    }
+
+    /*
+     * importTripPlans reads Trip Plan records from the reader. The activity
+     * and instruction sections are variable length and each ends with a
+     * "=END=" line. A structural error stops the import; records with
+     * invalid values or duplicate names are skipped with a message; valid
+     * records are displayed and added only if the user confirms.
+     *
+     * @param r the reader positioned at the start of the file
+     * @throws IOException if the file cannot be read
+     */
+    static void importTripPlans(BufferedReader r) throws IOException {
+        int added = 0;
+        int skipped = 0;
+        String name;
+        while ((name = r.readLine()) != null) {
+            if (name.isBlank()) continue;
+            String author = r.readLine();
+            String desc = r.readLine();
+            String times = r.readLine();
+            String numA = r.readLine();
+            int nA = numA == null ? -1 : toInt(numA.trim());
+            if (nA < 1 || nA > 20) {
+                importFailed(added, skipped);
+                return;
+            }
+            String[] acts = new String[nA];
+            for (int i = 0; i < nA; i++) acts[i] = r.readLine();
+            String numI = null;
+            if ("=END=".equals(r.readLine())) numI = r.readLine();
+            int nI = numI == null ? -1 : toInt(numI.trim());
+            if (nI < 1 || nI > 20) {
+                importFailed(added, skipped);
+                return;
+            }
+            String[] ins = new String[nI];
+            for (int i = 0; i < nI; i++) ins[i] = r.readLine();
+            if (!"=END=".equals(r.readLine())) {
+                importFailed(added, skipped);
+                return;
+            }
+
+            String problem = null;
+            String[] tm = times == null ? new String[0] : times.trim().split(" ");
+            int prep = tm.length == 2 ? toInt(tm[0]) : -1;
+            int travel = tm.length == 2 ? toInt(tm[1]) : -1;
+            if (
+                isinValidLength(name, 3, 50) ||
+                !name.matches("^[a-zA-Z0-9 ]+$")
+            ) problem = "Invalid Trip Plan Name.";
+            else if (!isValidAuthor(author)) problem = "Invalid Author.";
+            else if (desc == null || desc.isBlank() || isinValidLength(desc, 1, 160)) problem =
+                "Invalid Trip Description.";
+            else if (!isPositive(prep) || !isPositive(travel)) problem =
+                "Invalid Preparation Or Travel Time.";
+            else if (IsDuplicate(name, tripCount, trip)) problem =
+                "Trip Plan Already Exists.";
+            for (int i = 0; problem == null && i < nA; i++) {
+                if (acts[i] == null || acts[i].isBlank() || isinValidLength(acts[i], 1, 80)) problem =
+                    "Invalid Activity " + (i + 1) + ".";
+            }
+            for (int i = 0; problem == null && i < nI; i++) {
+                if (ins[i] == null || ins[i].isBlank() || isinValidLength(ins[i], 1, 100)) problem =
+                    "Invalid Instruction " + (i + 1) + ".";
+            }
+
+            if (problem != null) {
+                System.out.println(
+                    "Skipping \"" + name + "\": " + problem + "\n"
+                );
+                skipped++;
+                continue;
+            }
+            if (tripCount == 20) {
+                System.out.println(
+                    "Trip Plan Limit Reached. No Additional Records Can Be Added."
+                );
+                break;
+            }
+
+            System.out.println("--------------------------------------------------");
+            System.out.println("Trip Name        : " + name);
+            System.out.println("Author           : " + author);
+            System.out.println("Description      : " + desc);
+            System.out.println("Preparation Time : " + prep + " minutes");
+            System.out.println("Travel Time      : " + travel + " minutes");
+            System.out.println("Activities       :");
+            for (int i = 0; i < nA; i++) System.out.println(
+                "  [" + (i + 1) + "] " + acts[i]
+            );
+            System.out.println("Instructions     :");
+            for (int i = 0; i < nI; i++) System.out.println(
+                "  [" + (i + 1) + "] " + ins[i]
+            );
+            System.out.println("--------------------------------------------------");
+            System.out.println("Do You Want To Add This Trip Plan?");
+            if (yesOrNo()) {
+                trip[tripCount] = new tripPlan(
+                    name,
+                    desc,
+                    prep,
+                    travel,
+                    nA,
+                    acts,
+                    nI,
+                    ins,
+                    author.split(" ", 2)[0],
+                    author.split(" ", 2)[1]
+                );
+                tripCount++;
+                added++;
+                System.out.println("Trip Plan Added.\n");
+            } else {
+                skipped++;
+                System.out.println("Trip Plan Skipped.\n");
+            }
+        }
+        System.out.println(
+            "Import Finished. Added: " + added + ", Skipped: " + skipped
+        );
+    }
+
+
+    static boolean isValidAuthor(String line) {
+        if (line == null) return false;
+        String[] au = line.split(" ", 2);
+        return (
+            au.length == 2 &&
+            au[0].matches("[a-zA-Z0-9]{8,50}") &&
+            !isinValidLength(au[1], 5, 80) &&
+            !au[1].isBlank() &&
+            !au[1].matches(".*[0-9].*")
+        );
+    }
+
+
+    static void importFailed(int added, int skipped) {
+        System.out.println("Invalid File.");
+        System.out.println("Unable To Import Data.");
+        System.out.println(
+            "Added Before Error: " + added + ", Skipped: " + skipped
+        );
+    }
+
+
+    static int toInt(String text) {
+        try {
+            return Integer.parseInt(text.trim());
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
+
+    static void exportData() {
+        System.out.println(
+            "==================================================\n"
+        );
+        System.out.println("[13] Export Menu");
+        System.out.println(
+            "==================================================\n"
+        );
+        System.out.println(
+            "[1] Export User\n[2] Export Travel Logs\n[3] Export Trip Plans\n"
+        );
+        int choice;
+        do {
+            System.out.print("Enter Choice: ");
+            choice = numOnly();
+            s.nextLine();
+            if (choice < 1 || choice > 3) System.out.println(
+                "Invalid Input, Please Choose Among The Choices Only."
+            );
+        } while (choice < 1 || choice > 3);
+
+        if (choice == 1) {
+            if (saveUser(p)) System.out.println("User Exported Successfully.");
+            return;
+        }
+        if (choice == 2 && logCount == 0) {
+            System.out.println("There Are No Travel Logs To Export.");
+            return;
+        }
+        if (choice == 3 && tripCount == 0) {
+            System.out.println("There Are No Trip Plans To Export.");
+            return;
+        }
+
+        String fileName = readFileName(
+            "Please Enter The Name Of The File Where You Want To Export"
+        );
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(fileName))) {
+            if (choice == 2) {
+                for (int i = 0; i < logCount; i++) {
+                    w.write(log[i].destinationName);
+                    w.newLine();
+                    w.write(
+                        log[i].authorUsername + " " + log[i].authorFullName
+                    );
+                    w.newLine();
+                    w.write(log[i].destinationType + " " + log[i].visits);
+                    w.newLine();
+                    w.write(log[i].dateVisited);
+                    w.newLine();
+                    w.write(log[i].location);
+                    w.newLine();
+                    w.write(log[i].travelExp);
+                    w.newLine();
+                }
+            } else {
+                for (int i = 0; i < tripCount; i++) {
+                    w.write(trip[i].planName);
+                    w.newLine();
+                    w.write(
+                        trip[i].authorUsername + " " + trip[i].authorFullName
+                    );
+                    w.newLine();
+                    w.write(trip[i].planDescription);
+                    w.newLine();
+                    w.write(
+                        trip[i].planPrepTime + " " + trip[i].planTravelTime
+                    );
+                    w.newLine();
+                    w.write(String.valueOf(trip[i].planActivities));
+                    w.newLine();
+                    for (int j = 0; j < trip[i].planActivities; j++) {
+                        w.write(trip[i].tripListActivities[j]);
+                        w.newLine();
+                    }
+                    w.write("=END=");
+                    w.newLine();
+                    w.write(String.valueOf(trip[i].planNumInstructions));
+                    w.newLine();
+                    for (int j = 0; j < trip[i].planNumInstructions; j++) {
+                        w.write(trip[i].planInstructions[j]);
+                        w.newLine();
+                    }
+                    w.write("=END=");
+                    w.newLine();
+                }
+            }
+            System.out.println("Exported Successfully To " + fileName);
+        } catch (IOException e) {
+            System.out.println("Could Not Write " + fileName);
+        }
+    }
+
+
+    static String readFileName(String text) {
+        while (true) {
+            System.out.println();
+            System.out.println(text);
+            System.out.print(
+                "File Name Must Not Exceed 30 Characters, Including The File Extension (.txt).\nEnter File Name: "
+            );
+            String name = s.nextLine().trim();
+            System.out.println();
+            if (!name.matches("[a-zA-Z0-9_-]+(\\.txt)?")) {
+                System.out.println(
+                    "Invalid Input, Use Only Letters, Numbers, _ And - (No Spaces)."
+                );
+                continue;
+            }
+            if (!name.toLowerCase().endsWith(".txt")) name += ".txt";
+            if (name.length() > 30) {
+                System.out.println(
+                    "Invalid Input, File Name Must Not Exceed 30 Characters Including .txt"
+                );
+                continue;
+            }
+            return name;
+        }
+    }
+
+
+    static boolean saveUser(User user) {
+        String fileName = readFileName(
+            "Please Enter The Name Of The File Where You Want Your Account Information To Be Saved"
+        );
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(fileName))) {
+            w.write(user.userName);
+            w.newLine();
+            w.write(user.passW);
+            w.newLine();
+            w.write(user.fullName);
+            w.newLine();
+            w.write(user.emailAddr);
+            w.newLine();
+            w.write(user.mobNumber);
+            w.newLine();
+            return true;
+        } catch (IOException e) {
+            System.out.println("Could Not Write " + fileName);
+            return false;
         }
     }
 
     static User loadProfile() {
-        try {
-            BufferedReader reader = new BufferedReader(
-                new FileReader("User.txt")
+        while (true) {
+            String fileName = readFileName(
+                "Please Enter The Name Of Your Previously Saved User Profile File"
             );
-            String fullName = reader.readLine();
-            String userName = reader.readLine();
-            String gmail = reader.readLine();
-            String num = reader.readLine();
-            String passWord = reader.readLine();
-            reader.close();
-
-            if (
-                fullName == null ||
-                userName == null ||
-                gmail == null ||
-                num == null ||
-                passWord == null
-            ) {
-                System.out.println("User Profile Is Incomplete");
-                return null;
+            try (BufferedReader r = new BufferedReader(new FileReader(fileName))) {
+                String userName = r.readLine();
+                String passWord = r.readLine();
+                String fullName = r.readLine();
+                String email = r.readLine();
+                String num = r.readLine();
+                if (
+                    userName == null ||
+                    passWord == null ||
+                    fullName == null ||
+                    email == null ||
+                    num == null
+                ) {
+                    System.out.println("User Profile Is Incomplete.");
+                } else if (
+                    !isValidProfile(userName, passWord, fullName, email, num)
+                ) {
+                    System.out.println("User Profile Contains Invalid Data.");
+                } else {
+                    return new User(fullName, userName, email, num, passWord);
+                }
+            } catch (IOException e) {
+                System.out.println("Could Not Read " + fileName);
             }
-            return new User(fullName, userName, gmail, num, passWord);
-        } catch (IOException e) {
-            System.out.println(
-                "Could Not Read " + fileName + "\n" + e.getMessage()
-            );
-            return null;
+            System.out.println("Do You Want To Try Another File?");
+            if (!yesOrNo()) return null;
         }
+    }
+
+
+    static boolean isValidProfile(
+        String user,
+        String pass,
+        String full,
+        String email,
+        String num
+    ) {
+        return (
+            user.matches("[a-zA-Z0-9]{8,50}") &&
+            pass.length() >= 8 &&
+            pass.length() <= 20 &&
+            pass.matches("[a-zA-Z0-9!@#$%&*.]+") &&
+            pass.matches(".*[A-Z].*") &&
+            pass.matches(".*[a-z].*") &&
+            pass.matches(".*[0-9].*") &&
+            pass.matches(".*[!@#$%&*.].*") &&
+            full.length() >= 5 &&
+            full.length() <= 80 &&
+            !full.isBlank() &&
+            !full.matches(".*[0-9].*") &&
+            email.length() >= 1 &&
+            email.length() <= 30 &&
+            email.matches("[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+") &&
+            num.matches("0[0-9]{10}")
+        );
     }
 
     static boolean isinValidLength(String text, int min, int max) {
