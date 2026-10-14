@@ -21,7 +21,9 @@ public class travelLog {
         String number;
         String pass;
         String confirmPass;
-        System.out.println("If You Already Created A User Profile, Please Proceed To Sign In");
+        System.out.println(
+            "If You Already Created A User Profile, Please Proceed To Sign In"
+        );
         System.out.println(
             "==================================================\n"
         );
@@ -38,46 +40,16 @@ public class travelLog {
                 System.out.println("Sign Up");
                 System.out.println("Please Fill Up The Following.");
 
-                do {
-                    System.out.println();
-                    System.out.println(
-                        "Full Name Must Contain 5-80 Characters"
-                    );
-                    System.out.print("Enter Full Name: ");
-                    fName = s.nextLine();
-                    System.out.println();
-                    if (
-                        isinValidLength(fName, 5, 80) ||
-                        fName.isBlank() ||
-                        fName.matches(".*[0-9].*")
-                    ) System.out.println(
-                        "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                    );
-                } while (
-                    isinValidLength(fName, 5, 80) ||
-                    fName.isBlank() ||
-                    fName.matches(".*[0-9].*")
-                );
+                System.out.println();
+                System.out.println("Full Name Must Contain 5-80 Characters");
+                fName = validation("Enter Full Name: ", 5, 80, "[a-zA-Z ]+");
+                System.out.println();
 
-                do {
-                    System.out.println(
-                        "User Name Must Contain 8-50 Characters And No Special Characters Or Spaces Are Allowed."
-                    );
-                    System.out.print("Enter User Name: ");
-                    uName = s.nextLine();
-                    System.out.println();
-                    if (
-                        isinValidLength(uName, 8, 50) ||
-                        !uName.matches("^[a-zA-Z0-9]+$") ||
-                        uName.isBlank()
-                    ) System.out.println(
-                        "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                    );
-                } while (
-                    isinValidLength(uName, 8, 50) ||
-                    !uName.matches("^[a-zA-Z0-9]+$") ||
-                    uName.isBlank()
+                System.out.println(
+                    "User Name Must Contain 8-50 Characters And No Special Characters Or Spaces Are Allowed."
                 );
+                uName = validation("Enter User Name: ", 8, 50, "[a-zA-Z0-9]+");
+                System.out.println();
 
                 do {
                     System.out.println(
@@ -99,92 +71,44 @@ public class travelLog {
                     email.isBlank()
                 );
 
-                do {
-                    System.out.println(
-                        "Mobile Number Must Contain Exactly 11 Numbers And Must Start With 0"
-                    );
-                    System.out.print("Enter Mobile Number: ");
-                    number = s.nextLine();
-                    System.out.println();
-                    if (
-                        !number.matches("^[0-9]+$") ||
-                        number.isBlank() ||
-                        number.charAt(0) != '0' ||
-                        isinValidLength(number, 11, 11)
-                    ) System.out.println(
-                        "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                    );
-                } while (
-                    !number.matches("^[0-9]+$") ||
-                    number.isBlank() ||
-                    number.charAt(0) != '0' ||
-                    isinValidLength(number, 11, 11)
+                System.out.println(
+                    "Mobile Number Must Contain Exactly 11 Numbers And Must Start With 0"
                 );
+
+                number = validation(
+                    "Enter Mobile Number: ",
+                    11,
+                    11,
+                    "0\\d{10}"
+                );
+                System.out.println();
 
                 do {
                     System.out.println(
                         "Password Must Contain 8-20 Characters, Must Contain At Least: 1 Uppercase Letter, 1 Lowercase Letter, 1 Number, And 1 Special Character"
                     );
-                    System.out.print("Enter Password: ");
-                    pass = s.nextLine();
+                    pass = validation(
+                        "Enter Password: ",
+                        8,
+                        20,
+                        "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%&*.])[A-Za-z\\d!@#$%&*.]{8,20}$"
+                    );
+
                     System.out.print("Confirmation: ");
                     confirmPass = s.nextLine();
                     if (!pass.equals(confirmPass)) System.out.println(
                         "Passwords Do Not Match, Please Try Again.\n"
                     );
-                    else if (
-                        isinValidLength(pass, 8, 20) ||
-                        !pass.matches("^[a-zA-Z0-9!@#$%&*.]+$") ||
-                        !pass.matches(".*[A-Z].*") ||
-                        !pass.matches(".*[0-9].*") ||
-                        !pass.matches(".*[a-z].*") ||
-                        !pass.matches(".*[!@#$%&*.].*") ||
-                        pass.isBlank()
-                    ) System.out.println(
-                        "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                    );
-                } while (
-                    !pass.equals(confirmPass) ||
-                    isinValidLength(pass, 8, 20) ||
-                    !pass.matches("^[a-zA-Z0-9!@#$%&*.]+$") ||
-                    !pass.matches(".*[A-Z].*") ||
-                    !pass.matches(".*[0-9].*") ||
-                    !pass.matches(".*[a-z].*") ||
-                    !pass.matches(".*[!@#$%&*.].*") ||
-                    pass.isBlank()
-                );
+                } while (!pass.equals(confirmPass));
+
                 p = new User(fName, uName, email, number, pass);
                 System.out.println();
-                System.out.println(
-                    "Do You Want To Save Your Profile Information So You Can Just Log In Next Time?\n"
-                );
-                if (yesOrNo()) {
-                    if (saveUser(p)) {
-                        System.out.println(
-                            "Profile Information Has Been Saved. Please Log In Next Time"
-                        );
-                    } else {
-                        System.out.println(
-                            "Profile Information Could Not Be Saved."
-                        );
-                    }
-                } else System.out.println("Profile Information Not Saved.");
-                System.out.println();
-                System.out.println(
-                    "Account Created Succesfuly, Now Proceeding To Log In"
-                );
+               saveUser(p);
                 System.out.println();
                 login();
                 break;
             case 2:
                 p = loadProfile();
-                if (p == null) {
-                    System.out.println(
-                        "No User Profile Was Loaded. Please Sign Up Or Try Again Later."
-                    );
-                    break;
-                }
-                System.out.println("User Profile Loaded Successfully.");
                 System.out.println();
                 login();
                 break;
@@ -207,6 +131,8 @@ public class travelLog {
                 "==================================================\n"
             );
             System.out.println("Welcome, " + name + "!\n");
+            System.out.println("Stored Travel Logs - " + logCount);
+            System.out.println("Stored Trip Plans - " + tripCount + "\n");
             System.out.println(
                 "[1] Add Travel Log\n" +
                     "[2] Add Trip Plan\n" +
@@ -226,6 +152,7 @@ public class travelLog {
             );
             System.out.print("Enter Choice: ");
             userInput = numOnly();
+            s.nextLine();
             System.out.println();
 
             if (userInput < 1 || userInput > 15) {
@@ -240,7 +167,7 @@ public class travelLog {
 
     static void menuFunction(int x) {
         switch (x) {
-            case 1:
+            case 1: //date format gawing valid
                 addTravelLog();
                 break;
             case 2:
@@ -252,10 +179,10 @@ public class travelLog {
             case 4:
                 modifyTrip();
                 break;
-            case 5:
+            case 5: //missing confirmation to delete
                 deleteTravelLog();
                 break;
-            case 6:
+            case 6: //missing confirmation to delete
                 deleteTripPlan();
                 break;
             case 7:
@@ -264,10 +191,10 @@ public class travelLog {
             case 8:
                 displayRecordsByUsername();
                 break;
-            case 9:
+            case 9: //ayusin from line 1786 to 1828. Gawing order based sa date
                 displayAllTravelLogs();
                 break;
-            case 10:
+            case 10: //ayusin din from line 1467 to 1427. Gawin ding ordered based sa trip name
                 displayAllTripPlans();
                 break;
             case 11:
@@ -312,27 +239,20 @@ public class travelLog {
             System.out.println(
                 "Destination Name Must Contain 3-50 Characters, And Must Be Unique, No Duplicates Allowed\nExample: Kapehan Sa Baguio"
             );
-            System.out.print("Enter Destination Name: ");
-            destiName = s.nextLine();
+            System.out.println();
+            destiName = validation(
+                "Enter Destination Name: ",
+                3,
+                50,
+                "^[a-zA-Z0-9 ]+$"
+            );
             System.out.println();
             if (isDuplicate(destiName, logCount, log)) System.out.println(
                 "Destination Name \"" +
                     destiName +
                     "\" Is Already Stored, Please Use Another Name."
             );
-            if (
-                isinValidLength(destiName, 3, 50) ||
-                destiName.isBlank() ||
-                !destiName.matches("^[a-zA-Z0-9 ]+$")
-            ) System.out.println(
-                "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-            );
-        } while (
-            destiName.isBlank() ||
-            isinValidLength(destiName, 3, 50) ||
-            isDuplicate(destiName, logCount, log) ||
-            !destiName.matches("^[a-zA-Z0-9 ]+$")
-        );
+        } while (isDuplicate(destiName, logCount, log));
 
         do {
             System.out.println(
@@ -381,32 +301,25 @@ public class travelLog {
             isinValidLength(firstDateVisited, 10, 10) ||
             !firstDateVisited.matches("\\d{2}/\\d{2}/\\d{4}")
         );
-        do {
-            System.out.println(
-                "Location Name Must Not Exceed 30 Characters, Specific Location Of Destination\nExample: Baguio"
-            );
-            System.out.print("Enter Location: ");
-            location = s.nextLine();
-            System.out.println();
-            if (
-                isinValidLength(location, 0, 30) || location.isBlank()
-            ) System.out.println(
-                "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-            );
-        } while (isinValidLength(location, 0, 30) || location.isBlank());
 
-        do {
-            System.out.println(
-                "Travel Experience Contains The User's Overall Experience, Impression, Notes About The Destination.\nMust Not Be Empty And Must Not Exceed 300 Characters."
-            );
-            travelexp = s.nextLine();
-            System.out.println();
-            if (
-                isinValidLength(travelexp, 0, 300) || travelexp.isBlank()
-            ) System.out.println(
-                "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-            );
-        } while (isinValidLength(travelexp, 0, 300) || travelexp.isBlank());
+        System.out.println(
+            "Location Name Must Not Exceed 30 Characters, Specific Location Of Destination\nExample: Baguio"
+        );
+        System.out.print("Enter Location: ");
+        location = validation("Enter Location: ", 0, 30, ".*");
+        System.out.println();
+
+        System.out.println(
+            "Travel Experience Contains The User's Overall Experience, Impression, Notes About The Destination.\nMust Not Be Empty And Must Not Exceed 300 Characters."
+        );
+        travelexp = validation(
+            "Enter Travel Experience: ",
+            0,
+            300,
+            ".*"
+        );
+        System.out.println();
+
         log[logCount] = new TravelLogObject(
             destiName,
             destiType,
@@ -448,46 +361,32 @@ public class travelLog {
             System.out.println(
                 "Trip Name Must Contain 3-50 Characters, And Must Be Unique, No Duplicates Allowed\nExample: Pahinga Sa Japan"
             );
-            System.out.print("Enter Trip Name: ");
-            tripName = s.nextLine();
+
+            tripName = validation(
+                "Enter Trip Name: ",
+                3,
+                50,
+                "^[a-zA-Z0-9 ]+$"
+            );
             System.out.println();
             if (IsDuplicate(tripName, tripCount, trip)) System.out.println(
                 "Trip Name \"" +
                     tripName +
                     "\" Is Already Stored, Please Use Another Name."
             );
-            if (
-                IsDuplicate(tripName, tripCount, trip) ||
-                tripName.isBlank() ||
-                isinValidLength(tripName, 3, 50) ||
-                !tripName.matches("^[a-zA-Z0-9 ]+$")
-            ) System.out.println(
-                "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-            );
-        } while (
-            tripName.isBlank() ||
-            IsDuplicate(tripName, tripCount, trip) ||
-            isinValidLength(tripName, 3, 50) ||
-            !tripName.matches("^[a-zA-Z0-9 ]+$")
+        } while (IsDuplicate(tripName, tripCount, trip));
+
+        System.out.println(
+            "Trip Description Describe The Purpose Or Overall Plan For The Trip. Must Not Be Empty And Must Not Exceed 160 Characters"
         );
 
-        do {
-            System.out.println(
-                "Trip Description Describe The Purpose Or Overall Plan For The Trip. Must Not Be Empty And Must Not Exceed 160 Characters"
-            );
-            System.out.print("Enter Trip Description: ");
-            tripDescription = s.nextLine();
-            System.out.println();
-            if (
-                tripDescription.isBlank() ||
-                isinValidLength(tripDescription, 1, 160)
-            ) System.out.println(
-                "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-            );
-        } while (
-            tripDescription.isBlank() ||
-            isinValidLength(tripDescription, 1, 160)
+        tripDescription = validation(
+            "Enter Trip Description: ",
+            0,
+            160,
+            ".*"
         );
+        System.out.println();
 
         do {
             System.out.println(
@@ -521,8 +420,8 @@ public class travelLog {
             );
             System.out.print("Enter Number Of Activities: ");
             tripNumActivities = numOnly();
-            s.nextLine();
             System.out.println();
+            s.nextLine();
             if (
                 !isPositive(tripNumActivities) || tripNumActivities > 20
             ) System.out.println(
@@ -533,25 +432,15 @@ public class travelLog {
         String[] tripListActivities = new String[tripNumActivities];
 
         for (int i = 0; i < tripNumActivities; i++) {
-            do {
-                System.out.println(
-                    "Trip Activity Must Not Be Empty, And Must Not Exceed 80 Characters"
-                );
+            System.out.println(
+                "Trip Activity Must Not Be Empty, And Must Not Exceed 80 Characters"
+            );
 
-                System.out.print("Enter Activity " + (i + 1) + ": ");
-                tripListActivities[i] = s.nextLine();
-
-                if (
-                    tripListActivities[i].isBlank() ||
-                    isinValidLength(tripListActivities[i], 1, 80)
-                ) {
-                    System.out.println(
-                        "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                    );
-                }
-            } while (
-                tripListActivities[i].isBlank() ||
-                isinValidLength(tripListActivities[i], 1, 80)
+            tripListActivities[i] = validation(
+                "Enter Activity " + (i + 1) + ": ",
+                0,
+                80,
+                ".*"
             );
         }
         System.out.println();
@@ -572,22 +461,18 @@ public class travelLog {
 
         String tripInstructions[] = new String[tripNumInstructions];
         for (int i = 0; i < tripNumInstructions; i++) {
-            do {
-                System.out.println(
-                    "Trip Instructions Must Not Be Empty, And Must Not Exceed 100 Characters."
-                );
-                System.out.print("Enter Trip Instructions" + (i + 1) + ": ");
-                tripInstructions[i] = s.nextLine();
-                if (
-                    tripInstructions[i].isBlank() ||
-                    isinValidLength(tripInstructions[i], 1, 100)
-                ) System.out.println(
-                    "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                );
-            } while (
-                tripInstructions[i].isBlank() ||
-                isinValidLength(tripInstructions[i], 1, 100)
+            System.out.println(
+                "Trip Instructions Must Not Be Empty, And Must Not Exceed 100 Characters."
             );
+            System.out.print("Enter Trip Instructions" + (i + 1) + ": ");
+            tripInstructions[i] = validation(
+                "Enter Trip Instructions" + (i + 1) + ": ",
+                1,
+                100,
+                ".*"
+            );
+
+            System.out.println();
         }
         trip[tripCount] = new tripPlan(
             tripName,
@@ -679,7 +564,12 @@ public class travelLog {
                             "Destination Name Must Contain 3-50 Characters, And Must Be Unique, No Duplicates Allowed\nExample: Kapehan Sa Baguio"
                         );
                         System.out.print("Enter New Destination Name: ");
-                        newDestiName = s.nextLine();
+                        newDestiName = validation(
+                            "Enter New Destination Name: ",
+                            3,
+                            50,
+                            "^[a-zA-Z0-9 ]+$"
+                        );
                         System.out.println();
                         if (
                             isDuplicate(newDestiName, logCount, log)
@@ -688,19 +578,7 @@ public class travelLog {
                                 newDestiName +
                                 "\" Is Already Stored, Please Use Another Name."
                         );
-                        if (
-                            isinValidLength(newDestiName, 3, 50) ||
-                            newDestiName.isBlank() ||
-                            !newDestiName.matches("^[a-zA-Z0-9 ]+$")
-                        ) System.out.println(
-                            "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                        );
-                    } while (
-                        isinValidLength(newDestiName, 3, 50) ||
-                        isDuplicate(newDestiName, logCount, log) ||
-                        newDestiName.isBlank() ||
-                        !newDestiName.matches("^[a-zA-Z0-9 ]+$")
-                    );
+                    } while (isDuplicate(newDestiName, logCount, log));
                     System.out.println(
                         "Are You Sure You Want To Change The Previous Destination Name \"" +
                             log[logIndex].destinationName +
@@ -863,7 +741,7 @@ public class travelLog {
                     System.out.println();
                     break;
                 case 5:
-                    do {
+
                         System.out.println(
                             "Modifying The Location Of Log \"" +
                                 log[logIndex].destinationName +
@@ -873,18 +751,9 @@ public class travelLog {
                             "Location Name Must Not Exceed 30 Characters, Specific Location Of Destination\nExample: Baguio"
                         );
                         System.out.print("Enter New Location: ");
-                        newLocation = s.nextLine();
+                        newLocation = validation("Enter New Location: ", 0, 30, ".*");
                         System.out.println();
-                        if (
-                            isinValidLength(newLocation, 0, 30) ||
-                            newLocation.isBlank()
-                        ) System.out.println(
-                            "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                        );
-                    } while (
-                        isinValidLength(newLocation, 0, 30) ||
-                        newLocation.isBlank()
-                    );
+
                     System.out.println(
                         "Are You Sure You Want To Change The \"" +
                             log[logIndex].destinationName +
@@ -909,7 +778,7 @@ public class travelLog {
                     System.out.println();
                     break;
                 case 6:
-                    do {
+
                         System.out.println(
                             "Modifying The Travel Experience Of Log \"" +
                                 log[logIndex].destinationName +
@@ -918,18 +787,9 @@ public class travelLog {
                         System.out.println(
                             "Travel Experience Contains The User's Overall Experience, Impression, Notes About The Destination.\nMust Not Be Empty And Must Not Exceed 300 Characters."
                         );
-                        newTravelExp = s.nextLine();
+                        newTravelExp = validation("Enter New Travel Experience: ", 0, 300,  ".*");
                         System.out.println();
-                        if (
-                            isinValidLength(newTravelExp, 0, 300) ||
-                            newTravelExp.isBlank()
-                        ) System.out.println(
-                            "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                        );
-                    } while (
-                        isinValidLength(newTravelExp, 0, 300) ||
-                        newTravelExp.isBlank()
-                    );
+
                     System.out.println(
                         "Are You Sure You Want To Change The \"" +
                             log[logIndex].destinationName +
@@ -1019,7 +879,7 @@ public class travelLog {
                             trip[tripIndex].planName +
                             "\""
                     );
-                    do {
+
                         System.out.println(
                             "Current Name Of Trip Plan :\n\"" +
                                 trip[tripIndex].planName +
@@ -1029,8 +889,8 @@ public class travelLog {
                         System.out.println(
                             "Trip Name Must Contain 3-50 Characters, And Must Be Unique, No Duplicates Allowed\nExample: Pahinga Sa Japan"
                         );
-                        System.out.print("Enter New Trip Name: ");
-                        newPlanName = s.nextLine();
+
+                        newPlanName = validation("Enter New Trip Name: ", 3, 50, "^[a-zA-Z0-9 ]+$");
                         if (
                             IsDuplicate(newPlanName, tripCount, trip)
                         ) System.out.println(
@@ -1038,20 +898,7 @@ public class travelLog {
                                 newPlanName +
                                 "\" Is Already Stored, Please Use Another Name."
                         );
-                        if (
-                            IsDuplicate(newPlanName, tripCount, trip) ||
-                            newPlanName.isBlank() ||
-                            isinValidLength(newPlanName, 3, 50) ||
-                            !newPlanName.matches("^[a-zA-Z0-9 ]+$")
-                        ) System.out.println(
-                            "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                        );
-                    } while (
-                        IsDuplicate(newPlanName, tripCount, trip) ||
-                        newPlanName.isBlank() ||
-                        isinValidLength(newPlanName, 3, 50) ||
-                        !newPlanName.matches("^[a-zA-Z0-9 ]+$")
-                    );
+
                     System.out.println();
                     System.out.println(
                         "Are You Sure You Want To Change The Previous Trip Plan Name Of \"" +
@@ -1078,7 +925,7 @@ public class travelLog {
                     System.out.println();
                     break;
                 case 2:
-                    do {
+
                         System.out.println();
                         System.out.println(
                             "Modifying Trip Description Of Trip \"" +
@@ -1093,19 +940,10 @@ public class travelLog {
                         System.out.println(
                             "Trip Description Describe The Purpose Or Overall Plan For The Trip. Must Not Be Empty And Must Not Exceed 160 Characters"
                         );
-                        System.out.print("Enter New Trip Description For: ");
-                        newTripDesc = s.nextLine();
+
+                        newTripDesc = validation("Enter New Trip Description: ", 1, 160, ".*");
                         System.out.println();
-                        if (
-                            newTripDesc.isBlank() ||
-                            isinValidLength(newTripDesc, 1, 160)
-                        ) System.out.println(
-                            "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                        );
-                    } while (
-                        newTripDesc.isBlank() ||
-                        isinValidLength(newTripDesc, 1, 160)
-                    );
+
                     System.out.println(
                         "Are You Sure You Want To Change The Trip Description From \"" +
                             trip[tripIndex].planDescription +
@@ -1251,28 +1089,15 @@ public class travelLog {
                     s.nextLine();
 
                     for (int i = 0; i < newNumOfActs; i++) {
-                        do {
+
                             System.out.println(
-                                "Trip Activity Must Not Be Empty, And Must Not Exceed 80 Characters"
+                                "Trip Activity Must Not Be Empty, And Must Not Exceed 80 Characters\n"
                             );
 
-                            System.out.print(
-                                "Enter Activity " + (i + 1) + ": "
-                            );
-                            newActivities[i] = s.nextLine();
 
-                            if (
-                                newActivities[i].isBlank() ||
-                                isinValidLength(newActivities[i], 1, 80)
-                            ) {
-                                System.out.println(
-                                    "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                                );
-                            }
-                        } while (
-                            newActivities[i].isBlank() ||
-                            isinValidLength(newActivities[i], 1, 80)
-                        );
+                            newActivities[i] = validation("Enter Activity " + (i + 1) + ": ", 1, 80, ".*" );
+
+
                     }
                     System.out.println(
                         "Are You Sure You Want To Change Trip Number Of Activities And List Of Activities?"
@@ -1297,27 +1122,16 @@ public class travelLog {
                     ].planActivities];
 
                     for (int i = 0; i < trip[tripIndex].planActivities; i++) {
-                        do {
+
                             System.out.println(
                                 "Trip Activity Must Not Be Empty, And Must Not Exceed 80 Characters"
                             );
                             System.out.print(
                                 "Enter New Activity " + (i + 1) + ": "
                             );
-                            changedActivities[i] = s.nextLine();
+                            changedActivities[i] = validation("Enter New Activity " + (i + 1) + ": ", 1, 80, ".*");
 
-                            if (
-                                changedActivities[i].isBlank() ||
-                                isinValidLength(changedActivities[i], 1, 80)
-                            ) {
-                                System.out.println(
-                                    "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                                );
-                            }
-                        } while (
-                            changedActivities[i].isBlank() ||
-                            isinValidLength(changedActivities[i], 1, 80)
-                        );
+
                     }
 
                     System.out.println(
@@ -1378,28 +1192,15 @@ public class travelLog {
                     System.out.println();
                     s.nextLine();
                     for (int i = 0; i < newNumOfInstructions; i++) {
-                        do {
+
                             System.out.println(
                                 "Trip Activity Must Not Be Empty, And Must Not Exceed 80 Characters"
                             );
 
-                            System.out.print(
-                                "Enter Activity " + (i + 1) + ": "
-                            );
-                            newInstructions[i] = s.nextLine();
 
-                            if (
-                                isinValidLength(newInstructions[i], 1, 80) ||
-                                newInstructions[i].isBlank()
-                            ) {
-                                System.out.println(
-                                    "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                                );
-                            }
-                        } while (
-                            newInstructions[i].isBlank() ||
-                            isinValidLength(newInstructions[i], 1, 80)
-                        );
+                            newInstructions[i] = validation("Enter Activity " + (i + 1) + ": ", 1, 80, ".*");
+
+
                     }
                     System.out.println(
                         "Are You Sure You Want To Change The Current Number Of Instructions And Instructions?"
@@ -1423,7 +1224,7 @@ public class travelLog {
                         i < trip[tripIndex].planNumInstructions;
                         i++
                     ) {
-                        do {
+
                             for (
                                 int j = 0;
                                 j < trip[tripIndex].planInstructions.length;
@@ -1440,23 +1241,10 @@ public class travelLog {
                                 "Trip Activity Must Not Be Empty, And Must Not Exceed 80 Characters"
                             );
 
-                            System.out.print(
-                                "Enter New Activity " + (i + 1) + ": "
-                            );
-                            changedInstructions[i] = s.nextLine();
 
-                            if (
-                                changedInstructions[i].isBlank() ||
-                                isinValidLength(changedInstructions[i], 1, 80)
-                            ) {
-                                System.out.println(
-                                    "Invalid Input, Please Try Again. Follow The Instructions Below\n"
-                                );
-                            }
-                        } while (
-                            changedInstructions[i].isBlank() ||
-                            isinValidLength(changedInstructions[i], 1, 80)
-                        );
+                            changedInstructions[i] = validation("Enter New Activity " + (i + 1) + ": ", 1, 80, ".*");
+
+
                     }
                     System.out.println(
                         "Are You Sure You Want To Change The Trip Instructions?"
@@ -1832,7 +1620,6 @@ public class travelLog {
         System.out.println();
     }
 
-
     static void displayRecordsByUsername() {
         String searchName;
         System.out.println(
@@ -2029,7 +1816,6 @@ public class travelLog {
         }
     }
 
-
     static void login() {
         System.out.println("Log In");
         System.out.println("Please Fill Up The Following");
@@ -2048,9 +1834,7 @@ public class travelLog {
             }
             failed++;
             System.out.println(
-                "Login Unsuccessful. Unsuccessful Attempts: " +
-                    failed +
-                    " Of 3"
+                "Login Unsuccessful. Unsuccessful Attempts: " + failed + " Of 3"
             );
             System.out.println();
         }
@@ -2063,7 +1847,6 @@ public class travelLog {
             confirm = s.nextLine().trim();
         } while (!confirm.equalsIgnoreCase("okay"));
     }
-
 
     static void importData() {
         System.out.println(
@@ -2096,7 +1879,6 @@ public class travelLog {
         }
     }
 
-
     static void importTravelLogs(BufferedReader r) throws IOException {
         int added = 0;
         int skipped = 0;
@@ -2118,8 +1900,7 @@ public class travelLog {
             int visits = tv.length == 2 ? toInt(tv[1]) : -1;
             String problem = null;
             if (
-                isinValidLength(name, 3, 50) ||
-                !name.matches("^[a-zA-Z0-9 ]+$")
+                isinValidLength(name, 3, 50) || !name.matches("^[a-zA-Z0-9 ]+$")
             ) problem = "Invalid Destination Name.";
             else if (!isValidAuthor(author)) problem = "Invalid Author.";
             else if (tv.length != 2 || !tv[0].matches("[bmcho]")) problem =
@@ -2148,15 +1929,21 @@ public class travelLog {
                 break;
             }
 
-            System.out.println("--------------------------------------------------");
+            System.out.println(
+                "--------------------------------------------------"
+            );
             System.out.println("Destination Name   : " + name);
             System.out.println("Author             : " + author);
-            System.out.println("Destination Type   : " + destinationTypeName(tv[0]));
+            System.out.println(
+                "Destination Type   : " + destinationTypeName(tv[0])
+            );
             System.out.println("Number Of Visits   : " + visits);
             System.out.println("Date First Visited : " + date);
             System.out.println("Location           : " + loc);
             System.out.println("Travel Experience  : " + exp);
-            System.out.println("--------------------------------------------------");
+            System.out.println(
+                "--------------------------------------------------"
+            );
             System.out.println("Do You Want To Add This Travel Log?");
             if (yesOrNo()) {
                 log[logCount] = new TravelLogObject(
@@ -2182,16 +1969,7 @@ public class travelLog {
         );
     }
 
-    /*
-     * importTripPlans reads Trip Plan records from the reader. The activity
-     * and instruction sections are variable length and each ends with a
-     * "=END=" line. A structural error stops the import; records with
-     * invalid values or duplicate names are skipped with a message; valid
-     * records are displayed and added only if the user confirms.
-     *
-     * @param r the reader positioned at the start of the file
-     * @throws IOException if the file cannot be read
-     */
+
     static void importTripPlans(BufferedReader r) throws IOException {
         int added = 0;
         int skipped = 0;
@@ -2224,27 +2002,34 @@ public class travelLog {
             }
 
             String problem = null;
-            String[] tm = times == null ? new String[0] : times.trim().split(" ");
+            String[] tm =
+                times == null ? new String[0] : times.trim().split(" ");
             int prep = tm.length == 2 ? toInt(tm[0]) : -1;
             int travel = tm.length == 2 ? toInt(tm[1]) : -1;
             if (
-                isinValidLength(name, 3, 50) ||
-                !name.matches("^[a-zA-Z0-9 ]+$")
+                isinValidLength(name, 3, 50) || !name.matches("^[a-zA-Z0-9 ]+$")
             ) problem = "Invalid Trip Plan Name.";
             else if (!isValidAuthor(author)) problem = "Invalid Author.";
-            else if (desc == null || desc.isBlank() || isinValidLength(desc, 1, 160)) problem =
-                "Invalid Trip Description.";
+            else if (
+                desc == null || desc.isBlank() || isinValidLength(desc, 1, 160)
+            ) problem = "Invalid Trip Description.";
             else if (!isPositive(prep) || !isPositive(travel)) problem =
                 "Invalid Preparation Or Travel Time.";
             else if (IsDuplicate(name, tripCount, trip)) problem =
                 "Trip Plan Already Exists.";
             for (int i = 0; problem == null && i < nA; i++) {
-                if (acts[i] == null || acts[i].isBlank() || isinValidLength(acts[i], 1, 80)) problem =
-                    "Invalid Activity " + (i + 1) + ".";
+                if (
+                    acts[i] == null ||
+                    acts[i].isBlank() ||
+                    isinValidLength(acts[i], 1, 80)
+                ) problem = "Invalid Activity " + (i + 1) + ".";
             }
             for (int i = 0; problem == null && i < nI; i++) {
-                if (ins[i] == null || ins[i].isBlank() || isinValidLength(ins[i], 1, 100)) problem =
-                    "Invalid Instruction " + (i + 1) + ".";
+                if (
+                    ins[i] == null ||
+                    ins[i].isBlank() ||
+                    isinValidLength(ins[i], 1, 100)
+                ) problem = "Invalid Instruction " + (i + 1) + ".";
             }
 
             if (problem != null) {
@@ -2261,7 +2046,9 @@ public class travelLog {
                 break;
             }
 
-            System.out.println("--------------------------------------------------");
+            System.out.println(
+                "--------------------------------------------------"
+            );
             System.out.println("Trip Name        : " + name);
             System.out.println("Author           : " + author);
             System.out.println("Description      : " + desc);
@@ -2275,7 +2062,9 @@ public class travelLog {
             for (int i = 0; i < nI; i++) System.out.println(
                 "  [" + (i + 1) + "] " + ins[i]
             );
-            System.out.println("--------------------------------------------------");
+            System.out.println(
+                "--------------------------------------------------"
+            );
             System.out.println("Do You Want To Add This Trip Plan?");
             if (yesOrNo()) {
                 trip[tripCount] = new tripPlan(
@@ -2303,7 +2092,6 @@ public class travelLog {
         );
     }
 
-
     static boolean isValidAuthor(String line) {
         if (line == null) return false;
         String[] au = line.split(" ", 2);
@@ -2316,7 +2104,6 @@ public class travelLog {
         );
     }
 
-
     static void importFailed(int added, int skipped) {
         System.out.println("Invalid File.");
         System.out.println("Unable To Import Data.");
@@ -2325,7 +2112,6 @@ public class travelLog {
         );
     }
 
-
     static int toInt(String text) {
         try {
             return Integer.parseInt(text.trim());
@@ -2333,7 +2119,6 @@ public class travelLog {
             return -1;
         }
     }
-
 
     static void exportData() {
         System.out.println(
@@ -2428,7 +2213,6 @@ public class travelLog {
         }
     }
 
-
     static String readFileName(String text) {
         while (true) {
             System.out.println();
@@ -2455,12 +2239,9 @@ public class travelLog {
         }
     }
 
-
     static boolean saveUser(User user) {
-        String fileName = readFileName(
-            "Please Enter The Name Of The File Where You Want Your Account Information To Be Saved"
-        );
-        try (BufferedWriter w = new BufferedWriter(new FileWriter(fileName))) {
+
+        try (BufferedWriter w = new BufferedWriter(new FileWriter("userInfo.txt"))) {
             w.write(user.userName);
             w.newLine();
             w.write(user.passW);
@@ -2473,17 +2254,16 @@ public class travelLog {
             w.newLine();
             return true;
         } catch (IOException e) {
-            System.out.println("Could Not Write " + fileName);
+            System.out.println("Error");
             return false;
         }
     }
 
     static User loadProfile() {
         while (true) {
-            String fileName = readFileName(
-                "Please Enter The Name Of Your Previously Saved User Profile File"
-            );
-            try (BufferedReader r = new BufferedReader(new FileReader(fileName))) {
+            try (
+                BufferedReader r = new BufferedReader(new FileReader("userInfo.txt"))
+            ) {
                 String userName = r.readLine();
                 String passWord = r.readLine();
                 String fullName = r.readLine();
@@ -2505,13 +2285,11 @@ public class travelLog {
                     return new User(fullName, userName, email, num, passWord);
                 }
             } catch (IOException e) {
-                System.out.println("Could Not Read " + fileName);
+                System.out.println("Error");
             }
-            System.out.println("Do You Want To Try Another File?");
-            if (!yesOrNo()) return null;
+
         }
     }
-
 
     static boolean isValidProfile(
         String user,
@@ -2597,5 +2375,28 @@ public class travelLog {
             else System.out.println("Invalid Input, Please Try Again");
         } while (!tOrf.equalsIgnoreCase("yes") && !tOrf.equalsIgnoreCase("no"));
         return false;
+    }
+
+    static String validation(
+        String text,
+        int min,
+        int max,
+        String restriction
+    ) {
+        String userInput;
+        while (true) {
+            System.out.print(text);
+            userInput = s.nextLine().trim();
+            if (
+                userInput.length() >= min &&
+                userInput.length() <= max &&
+                userInput.matches(restriction)
+            ) {
+                return userInput;
+            }
+            System.out.println(
+                "Invalid Input, Please Try Again. Follow The Instructions Above.\n"
+            );
+        }
     }
 }
